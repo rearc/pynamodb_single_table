@@ -1,0 +1,1 @@
+"""PynamoDB Single Table."""
