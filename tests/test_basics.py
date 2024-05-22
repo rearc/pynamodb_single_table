@@ -1,16 +1,32 @@
+import abc
 import uuid
 
 import pytest
 
-from pynamodb_single_table.base import build_base_model
+from pynamodb_single_table.base import SingleTableBaseModel
 
 
-@pytest.fixture(scope="module")
-def BaseTableModel():
-    _BaseTableModel = build_base_model(
-        table_name="PSTTestRoot",
-        host="http://localhost:8000",
-    )
+class _BaseTableModel(SingleTableBaseModel, abc.ABC):
+    class _PynamodbMeta:
+        table_name = "PSTTestRoot"
+        host = "http://localhost:8000"
+
+
+class User(_BaseTableModel):
+    __table_name__ = "user"
+    __str_id_field__ = "name"
+    name: str
+    group_id: uuid.UUID | None = None
+
+
+class Group(_BaseTableModel):
+    __table_name__ = "group"
+    __str_id_field__ = "name"
+    name: str
+
+
+@pytest.fixture(scope="function", autouse=True)
+def recreate_pynamodb_table() -> type[SingleTableBaseModel]:
     _BaseTableModel.__pynamodb_model__.create_table(
         wait=True, billing_mode="PAY_PER_REQUEST"
     )
@@ -21,25 +37,7 @@ def BaseTableModel():
         _BaseTableModel.__pynamodb_model__.delete_table()
 
 
-@pytest.fixture(scope="module")
-def user_group_models(BaseTableModel):
-    class User(BaseTableModel):
-        __table_name__ = "user"
-        __str_id__ = "name"
-        name: str
-        group_id: uuid.UUID | None = None
-
-    class Group(BaseTableModel):
-        __table_name__ = "group"
-        __str_id__ = "name"
-        name: str
-
-    return User, Group
-
-
-def test_basic_interface(user_group_models):
-    User, Group = user_group_models
-
+def test_basic_interface():
     group, was_created = Group.get_or_create(name="Admins")
 
     user, was_created = User.get_or_create(
@@ -56,3 +54,15 @@ def test_basic_interface(user_group_models):
     # Check that we have exactly one user and one group
     assert Group.count() == 1, list(Group.scan())
     assert User.count() == 1, list(User.scan())
+
+
+def test_duplicate_creation():
+    group, _ = Group.get_or_create(name="Admins")
+
+    user1, user1_was_created = User.get_or_create(name="Joe Shmoe", group_id=group.uid)
+    user2, user2_was_created = User.get_or_create(name="Joe Shmoe")
+
+    assert user1_was_created
+    assert not user2_was_created
+    assert user1.uid == user2.uid
+    assert user1.group_id == user2.group_id
