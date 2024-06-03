@@ -19,5 +19,5 @@ reference
 contributing
 Code of Conduct <codeofconduct>
 License <license>
-Changelog <https://github.com/scnerd/pynamodb_single_table/releases>
+Changelog <https://github.com/rearc/pynamodb_single_table/releases>
 ```

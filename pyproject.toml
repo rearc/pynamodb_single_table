@@ -5,15 +5,15 @@ description = "PynamoDB Single Table"
 authors = ["David Maxson <scnerd@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/scnerd/pynamodb_single_table"
-repository = "https://github.com/scnerd/pynamodb_single_table"
+homepage = "https://github.com/rearc/pynamodb_single_table"
+repository = "https://github.com/rearc/pynamodb_single_table"
 documentation = "https://pynamodb_single_table.readthedocs.io"
 classifiers = [
     "Development Status :: 1 - Planning",
 ]
 
 [tool.poetry.urls]
-Changelog = "https://github.com/scnerd/pynamodb_single_table/releases"
+Changelog = "https://github.com/rearc/pynamodb_single_table/releases"
 
 [tool.poetry.dependencies]
 python = "^3.7"

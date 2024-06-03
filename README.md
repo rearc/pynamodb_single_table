@@ -7,17 +7,17 @@ A [Pydantic](https://docs.pydantic.dev/latest/) ORM built on top of [PynamoDB](h
 [![Python Version](https://img.shields.io/pypi/pyversions/pynamodb_single_table)][pypi status]
 [![License](https://img.shields.io/pypi/l/pynamodb_single_table)][license]
 
-[![Read the documentation at https://pynamodb_single_table.readthedocs.io/](https://img.shields.io/readthedocs/pynamodb_single_table/latest.svg?label=Read%20the%20Docs)][read the docs]
-[![Tests](https://github.com/scnerd/pynamodb_single_table/workflows/Tests/badge.svg)][tests]
-[![Codecov](https://codecov.io/gh/scnerd/pynamodb_single_table/branch/main/graph/badge.svg)][codecov]
+[![Read the documentation at https://pynamodb-single-table.readthedocs.io/](https://img.shields.io/readthedocs/pynamodb_single_table/latest.svg?label=Read%20the%20Docs)][read the docs]
+[![Tests](https://github.com/rearc/pynamodb_single_table/workflows/Tests/badge.svg)][tests]
+[![Codecov](https://codecov.io/gh/rearc/pynamodb_single_table/branch/main/graph/badge.svg)][codecov]
 
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
 
 [pypi status]: https://pypi.org/project/pynamodb_single_table/
 [read the docs]: https://pynamodb_single_table.readthedocs.io/
-[tests]: https://github.com/scnerd/pynamodb_single_table/actions?workflow=Tests
-[codecov]: https://app.codecov.io/gh/scnerd/pynamodb_single_table
+[tests]: https://github.com/rearc/pynamodb_single_table/actions?workflow=Tests
+[codecov]: https://app.codecov.io/gh/rearc/pynamodb_single_table
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
 
@@ -121,10 +121,10 @@ This project was generated from [@cjolowicz]'s [Hypermodern Python Cookiecutter]
 [@cjolowicz]: https://github.com/cjolowicz
 [pypi]: https://pypi.org/
 [hypermodern python cookiecutter]: https://github.com/cjolowicz/cookiecutter-hypermodern-python
-[file an issue]: https://github.com/scnerd/pynamodb_single_table/issues
+[file an issue]: https://github.com/rearc/pynamodb_single_table/issues
 [pip]: https://pip.pypa.io/
 
 <!-- github-only -->
 
-[license]: https://github.com/scnerd/pynamodb_single_table/blob/main/LICENSE
-[contributor guide]: https://github.com/scnerd/pynamodb_single_table/blob/main/CONTRIBUTING.md
+[license]: https://github.com/rearc/pynamodb_single_table/blob/main/LICENSE
+[contributor guide]: https://github.com/rearc/pynamodb_single_table/blob/main/CONTRIBUTING.md
