@@ -10,6 +10,11 @@ class _BaseTableModel(SingleTableBaseModel, abc.ABC):
     class _PynamodbMeta:
         table_name = "PSTTestRoot"
         host = "http://localhost:8000"
+        # THESE ARE FAKE, no worries, https://docs.aws.amazon.com/IAM/latest/UserGuide/security-creds.html
+        aws_access_key_id = "AKIAIOSFODNN7EXAMPLE"
+        aws_secret_access_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+        aws_session_token = "my_session_token"
+        region_name = "us-east-1"
 
 
 class User(_BaseTableModel):
