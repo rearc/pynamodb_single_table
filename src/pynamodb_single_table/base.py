@@ -2,6 +2,8 @@ import abc
 import itertools
 import uuid
 from inspect import isabstract
+from typing import Tuple
+from typing import Type
 
 from pydantic import BaseModel
 from pydantic import PrivateAttr
@@ -37,7 +39,7 @@ class RootModelPrototype(Model):
 
 class SingleTableBaseModel(BaseModel):
     _PynamodbMeta: MetaProtocol = PrivateAttr()
-    __pynamodb_model__: type[RootModelPrototype] = None
+    __pynamodb_model__: Type[RootModelPrototype] = None
 
     uid: uuid.UUID | None = None
 
@@ -78,7 +80,7 @@ class SingleTableBaseModel(BaseModel):
         pass
 
     @classmethod
-    def get_or_create(cls, **kwargs) -> tuple[Self, bool]:
+    def get_or_create(cls, **kwargs) -> Tuple[Self, bool]:
         obj = cls.model_validate(kwargs)
 
         if obj.uid is not None:
