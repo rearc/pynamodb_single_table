@@ -1,5 +1,7 @@
 import abc
 import uuid
+from typing import Optional
+from typing import Type
 
 import pytest
 
@@ -21,7 +23,7 @@ class User(_BaseTableModel):
     __table_name__ = "user"
     __str_id_field__ = "name"
     name: str
-    group_id: uuid.UUID | None = None
+    group_id: Optional[uuid.UUID] = None
 
 
 class Group(_BaseTableModel):
@@ -31,7 +33,7 @@ class Group(_BaseTableModel):
 
 
 @pytest.fixture(scope="function", autouse=True)
-def recreate_pynamodb_table() -> type[SingleTableBaseModel]:
+def recreate_pynamodb_table() -> Type[SingleTableBaseModel]:
     _BaseTableModel.__pynamodb_model__.create_table(
         wait=True, billing_mode="PAY_PER_REQUEST"
     )
