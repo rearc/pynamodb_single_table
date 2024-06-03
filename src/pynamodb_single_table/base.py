@@ -7,8 +7,8 @@ from typing import Tuple
 from typing import Type
 
 from pydantic import BaseModel
-from pydantic import PrivateAttr
 from pydantic import computed_field
+from pydantic.fields import ModelPrivateAttr
 from pynamodb.attributes import JSONAttribute
 from pynamodb.attributes import UnicodeAttribute
 from pynamodb.attributes import VersionAttribute
@@ -39,7 +39,7 @@ class RootModelPrototype(Model):
 
 
 class SingleTableBaseModel(BaseModel):
-    _PynamodbMeta: MetaProtocol = PrivateAttr()
+    _PynamodbMeta: MetaProtocol = None
     __pynamodb_model__: Type[RootModelPrototype] = None
 
     uid: Optional[uuid.UUID] = None
@@ -50,7 +50,7 @@ class SingleTableBaseModel(BaseModel):
                 cls.__pynamodb_model__, RootModelPrototype
             )  # TODO: Just duck type?
         else:
-            if not cls._PynamodbMeta:
+            if isinstance(cls._PynamodbMeta, ModelPrivateAttr):
                 raise TypeError(f"Must define the PynamoDB metadata for {cls}")
 
             class RootModel(RootModelPrototype):
@@ -61,12 +61,12 @@ class SingleTableBaseModel(BaseModel):
         if isabstract(cls) or abc.ABC in cls.__bases__:
             return super().__init_subclass__(**kwargs)
 
-        if not cls.__table_name__:
+        if not getattr(cls, "__table_name__", None):
             raise TypeError(
                 f"Must define the table name for {cls} (the inner table, not the pynamodb table)"
             )
 
-        if not cls.__str_id_field__:
+        if not getattr(cls, "__str_id_field__", None):
             raise TypeError(f"Must define the string ID field for {cls}")
 
     @computed_field
@@ -110,15 +110,19 @@ class SingleTableBaseModel(BaseModel):
             raise cls.MultipleObjectsFound()
         uuid_ = results[0].uid
 
-        try:
-            return cls.get_by_uid(uuid_)
-        except cls.__pynamodb_model__.DoesNotExist as e:
-            raise cls.DoesNotExist() from e
+        return cls.get_by_uid(uuid_)
 
     @classmethod
     def get_by_uid(cls, uuid_: uuid.UUID) -> Self:
-        response = cls.__pynamodb_model__.get(cls.__table_name__, uuid_)
-        return cls.model_validate(dict(uid=response.uid, **response.data))
+        try:
+            response = cls.__pynamodb_model__.get(cls.__table_name__, uuid_)
+        except cls.__pynamodb_model__.DoesNotExist as e:
+            raise cls.DoesNotExist() from e
+        return cls._from_item(response)
+
+    @classmethod
+    def _from_item(cls, item) -> Self:
+        return cls(uid=item.uid, **item.data)
 
     def create(self):
         item = self.__pynamodb_model__(
@@ -126,10 +130,12 @@ class SingleTableBaseModel(BaseModel):
             str_id=self.str_id,
             data=self.model_dump(mode="json", exclude={"uid", "str_id"}),
         )
-        condition = self.__pynamodb_model__._hash_key_attribute().does_not_exist()
-        rk_attr = self.__pynamodb_model__._range_key_attribute()
-        if rk_attr:
-            condition &= rk_attr.does_not_exist()
+        if self.uid is not None:
+            item.uid = self.uid
+        condition = (
+            self.__pynamodb_model__.table_name.does_not_exist()
+            & self.__pynamodb_model__.uid.does_not_exist()
+        )
         item.save(condition=condition, add_version_condition=False)
         assert item.uid is not None
         self.uid = item.uid
@@ -152,8 +158,18 @@ class SingleTableBaseModel(BaseModel):
 
     @classmethod
     def query(cls, *args, **kwargs):
-        return cls.__pynamodb_model__.query(cls.__table_name__, *args, **kwargs)
+        return (
+            cls._from_item(item)
+            for item in cls.__pynamodb_model__.query(
+                cls.__table_name__, *args, **kwargs
+            )
+        )
 
     @classmethod
     def scan(cls, *args, **kwargs):
-        return cls.__pynamodb_model__.scan(cls.__table_name__, *args, **kwargs)
+        return (
+            cls._from_item(item)
+            for item in cls.__pynamodb_model__.scan(
+                cls.__pynamodb_model__.table_name == cls.__table_name__, *args, **kwargs
+            )
+        )
