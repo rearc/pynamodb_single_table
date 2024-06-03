@@ -43,6 +43,7 @@ class SingleTableBaseModel(BaseModel):
     __pynamodb_model__: Type[RootModelPrototype] = None
 
     uid: Optional[uuid.UUID] = None
+    version: int = None
 
     def __init_subclass__(cls, **kwargs):
         if cls.__pynamodb_model__:
@@ -68,6 +69,10 @@ class SingleTableBaseModel(BaseModel):
 
         if not getattr(cls, "__str_id_field__", None):
             raise TypeError(f"Must define the string ID field for {cls}")
+
+    @classmethod
+    def ensure_table_exists(cls, **kwargs) -> None:
+        cls.__pynamodb_model__.create_table(wait=True, **kwargs)
 
     @computed_field
     @property
@@ -122,16 +127,23 @@ class SingleTableBaseModel(BaseModel):
 
     @classmethod
     def _from_item(cls, item) -> Self:
-        return cls(uid=item.uid, **item.data)
+        return cls(uid=item.uid, version=item.version, **item.data)
 
-    def create(self):
+    def _to_item(self) -> RootModelPrototype:
         item = self.__pynamodb_model__(
             self.__table_name__,
             str_id=self.str_id,
-            data=self.model_dump(mode="json", exclude={"uid", "str_id"}),
+            data=self.model_dump(mode="json", exclude={"uid", "version", "str_id"}),
         )
         if self.uid is not None:
             item.uid = self.uid
+        if self.version is not None:
+            item.version = self.version
+        return item
+
+    def create(self):
+        item = self._to_item()
+
         condition = (
             self.__pynamodb_model__.table_name.does_not_exist()
             & self.__pynamodb_model__.uid.does_not_exist()
@@ -139,18 +151,18 @@ class SingleTableBaseModel(BaseModel):
         item.save(condition=condition, add_version_condition=False)
         assert item.uid is not None
         self.uid = item.uid
+        self.version = item.version
         return self
 
     def save(self):
-        item = self.__pynamodb_model__(
-            self.__table_name__,
-            uid=self.uid,
-            str_id=self.str_id,
-            data=self.model_dump(mode="json", exclude={"uid", "str_id"}),
-        )
+        item = self._to_item()
         item.save(add_version_condition=False)
         assert item.uid is not None
         self.uid = item.uid
+        self.version = item.version
+
+    def delete(self):
+        self._to_item().delete()
 
     @classmethod
     def count(cls, *args, **kwargs):

@@ -5,7 +5,7 @@ from typing import Type
 
 import pytest
 
-from pynamodb_single_table.base import SingleTableBaseModel
+from pynamodb_single_table import SingleTableBaseModel
 
 
 class _BaseTableModel(SingleTableBaseModel, abc.ABC):
@@ -34,9 +34,7 @@ class Group(_BaseTableModel):
 
 @pytest.fixture(scope="function", autouse=True)
 def recreate_pynamodb_table() -> Type[SingleTableBaseModel]:
-    _BaseTableModel.__pynamodb_model__.create_table(
-        wait=True, billing_mode="PAY_PER_REQUEST"
-    )
+    _BaseTableModel.ensure_table_exists(billing_mode="PAY_PER_REQUEST")
 
     try:
         yield _BaseTableModel
@@ -159,3 +157,16 @@ def test_scan():
     assert len(users) == 2
     groups = list(Group.scan())
     assert len(groups) == 1
+
+
+def test_delete():
+    user1, _ = User.get_or_create(name="John Doe")
+    user2, _ = User.get_or_create(name="Joe Schmoe")
+
+    assert len(list(User.query())) == 2
+
+    print(list(User.__pynamodb_model__.scan()))
+    user1.delete()
+    assert len(list(User.query())) == 1
+    (userx,) = list(User.query())
+    assert userx.name == "Joe Schmoe"
