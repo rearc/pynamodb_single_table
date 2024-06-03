@@ -43,6 +43,12 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v3
 
+      - name: Setup DynamoDB Local
+        uses: rrainn/dynamodb-action@v2.0.1
+        with:
+          port: 8000
+          cors: '*'
+
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v4.6.1
         with:
