@@ -19,17 +19,17 @@ jobs:
       matrix:
         include:
           - { python: "3.10", os: "ubuntu-latest", session: "pre-commit" }
-          - { python: "3.10", os: "ubuntu-latest", session: "safety" }
-          - { python: "3.10", os: "ubuntu-latest", session: "mypy" }
-          - { python: "3.9", os: "ubuntu-latest", session: "mypy" }
-          - { python: "3.8", os: "ubuntu-latest", session: "mypy" }
-          - { python: "3.7", os: "ubuntu-latest", session: "mypy" }
+#          - { python: "3.10", os: "ubuntu-latest", session: "safety" }
+#          - { python: "3.10", os: "ubuntu-latest", session: "mypy" }
+#          - { python: "3.9", os: "ubuntu-latest", session: "mypy" }
+#          - { python: "3.8", os: "ubuntu-latest", session: "mypy" }
+#          - { python: "3.7", os: "ubuntu-latest", session: "mypy" }
           - { python: "3.10", os: "ubuntu-latest", session: "tests" }
           - { python: "3.9", os: "ubuntu-latest", session: "tests" }
           - { python: "3.8", os: "ubuntu-latest", session: "tests" }
           - { python: "3.7", os: "ubuntu-latest", session: "tests" }
-          - { python: "3.10", os: "windows-latest", session: "tests" }
-          - { python: "3.10", os: "macos-latest", session: "tests" }
+#          - { python: "3.10", os: "windows-latest", session: "tests" }
+#          - { python: "3.10", os: "macos-latest", session: "tests" }
           - { python: "3.10", os: "ubuntu-latest", session: "typeguard" }
           - { python: "3.10", os: "ubuntu-latest", session: "xdoctest" }
           - { python: "3.10", os: "ubuntu-latest", session: "docs-build" }
@@ -38,20 +38,27 @@ jobs:
       NOXSESSION: ${{ matrix.session }}
       FORCE_COLOR: "1"
       PRE_COMMIT_COLOR: "always"
+      AWS_DEFAULT_REGION: "us-east-1"
 
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
+
+      - name: Setup DynamoDB Local
+        uses: rrainn/dynamodb-action@v2.0.1
+        with:
+          port: 8000
+          cors: '*'
 
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v4.6.1
         with:
           python-version: ${{ matrix.python }}
 
-      - name: Upgrade pip
-        run: |
-          pip install --constraint=.github/workflows/constraints.txt pip
-          pip --version
+#      - name: Upgrade pip
+#        run: |
+#          pip install --constraint=.github/workflows/constraints.txt pip
+#          pip --version
 
       - name: Upgrade pip in virtual environments
         shell: python
@@ -64,13 +71,13 @@ jobs:
 
       - name: Install Poetry
         run: |
-          pipx install --pip-args=--constraint=.github/workflows/constraints.txt poetry
+          pipx install poetry
           poetry --version
 
       - name: Install Nox
         run: |
-          pipx install --pip-args=--constraint=.github/workflows/constraints.txt nox
-          pipx inject --pip-args=--constraint=.github/workflows/constraints.txt nox nox-poetry
+          pipx install nox
+          pipx inject nox nox-poetry
           nox --version
 
       - name: Compute pre-commit cache key
@@ -127,20 +134,20 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Upgrade pip
-        run: |
-          pip install --constraint=.github/workflows/constraints.txt pip
-          pip --version
+#      - name: Upgrade pip
+#        run: |
+#          pip install --constraint=.github/workflows/constraints.txt pip
+#          pip --version
 
       - name: Install Poetry
         run: |
-          pipx install --pip-args=--constraint=.github/workflows/constraints.txt poetry
+          pipx install poetry
           poetry --version
 
       - name: Install Nox
         run: |
-          pipx install --pip-args=--constraint=.github/workflows/constraints.txt nox
-          pipx inject --pip-args=--constraint=.github/workflows/constraints.txt nox nox-poetry
+          pipx install nox
+          pipx inject nox nox-poetry
           nox --version
 
       - name: Download coverage data

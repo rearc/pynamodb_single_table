@@ -1,5 +1,7 @@
 import abc
 import uuid
+from typing import Optional
+from typing import Type
 
 import pytest
 
@@ -10,13 +12,18 @@ class _BaseTableModel(SingleTableBaseModel, abc.ABC):
     class _PynamodbMeta:
         table_name = "PSTTestRoot"
         host = "http://localhost:8000"
+        # THESE ARE FAKE, no worries, https://docs.aws.amazon.com/IAM/latest/UserGuide/security-creds.html
+        aws_access_key_id = "AKIAIOSFODNN7EXAMPLE"
+        aws_secret_access_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+        aws_session_token = "my_session_token"
+        region_name = "us-east-1"
 
 
 class User(_BaseTableModel):
     __table_name__ = "user"
     __str_id_field__ = "name"
     name: str
-    group_id: uuid.UUID | None = None
+    group_id: Optional[uuid.UUID] = None
 
 
 class Group(_BaseTableModel):
@@ -26,7 +33,7 @@ class Group(_BaseTableModel):
 
 
 @pytest.fixture(scope="function", autouse=True)
-def recreate_pynamodb_table() -> type[SingleTableBaseModel]:
+def recreate_pynamodb_table() -> Type[SingleTableBaseModel]:
     _BaseTableModel.__pynamodb_model__.create_table(
         wait=True, billing_mode="PAY_PER_REQUEST"
     )
@@ -66,3 +73,89 @@ def test_duplicate_creation():
     assert not user2_was_created
     assert user1.uid == user2.uid
     assert user1.group_id == user2.group_id
+
+
+def test_error_no_metadata():
+    with pytest.raises(TypeError):
+
+        class BadBaseTableModel(SingleTableBaseModel):
+            pass
+
+    with pytest.raises(TypeError):
+
+        class BadSingleTableNoTableName(_BaseTableModel):
+            # Missing __table_name__
+            pass
+
+    with pytest.raises(TypeError):
+
+        class BadSingleTableEmptyTableName(_BaseTableModel):
+            # Empty __table_name__
+            __table_name__ = ""
+
+    with pytest.raises(TypeError):
+
+        class BadSingleTableNoStrIdField(_BaseTableModel):
+            __table_name__ = "table"
+            # Missing __str_id_field__
+
+    with pytest.raises(TypeError):
+
+        class BadSingleTableEmptyStrIdField(_BaseTableModel):
+            # Empty __str_id_field__
+            __table_name__ = "table"
+            __str_id_field__ = ""
+
+
+def test_preexisting_uid():
+    uid = uuid.uuid4()
+    user, was_created = User.get_or_create(name="Joe Shmoe", uid=uid)
+    assert user.uid == uid
+    assert was_created
+
+    user, was_created = User.get_or_create(name="John Doe", uid=uid)
+    assert user.uid == uid
+    assert not was_created
+    assert user.name == "Joe Shmoe"
+
+
+def test_preexisting_str_id():
+    user, was_created = User.get_or_create(name="Joe Shmoe")
+    assert was_created
+
+    user, was_created = User.get_or_create(name="Joe Shmoe")
+    assert not was_created
+    assert user.name == "Joe Shmoe"
+
+
+def test_duplicate_str_id():
+    user1 = User(name="Username", uid=uuid.uuid4())
+    user2 = User(name="Username", uid=uuid.uuid4())
+    user1.save()
+    user2.save()
+    with pytest.raises(User.MultipleObjectsFound):
+        User.get_by_str("Username")
+
+
+def test_query():
+    user1, _ = User.get_or_create(name="John Doe")
+    user2, _ = User.get_or_create(name="Joe Schmoe")
+
+    group1, _ = Group.get_or_create(name="Admins")
+
+    users = list(User.query())
+    assert len(users) == 2
+    groups = list(Group.query())
+    assert len(groups) == 1
+
+
+def test_scan():
+    user1, _ = User.get_or_create(name="John Doe")
+    user2, _ = User.get_or_create(name="Joe Schmoe")
+
+    group1, _ = Group.get_or_create(name="Admins")
+
+    users = list(User.scan())
+    assert len(users) == 2
+    groups = list(Group.scan())
+    assert len(groups) == 1
