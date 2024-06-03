@@ -1,4 +1,19 @@
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: "v4.6.0"
+    hooks:
+      - id: check-added-large-files
+      - id: check-toml
+        types: [ toml ]
+      - id: check-yaml
+        types: [ yaml ]
+      - id: end-of-file-fixer
+        types: [ text ]
+        stages: [ commit, push, manual ]
+      - id: trailing-whitespace
+        types: [ text ]
+        stages: [ commit, push, manual ]
+
   - repo: https://github.com/psf/black
     rev: 24.4.2
     hooks:
@@ -6,37 +21,7 @@ repos:
         additional_dependencies: [ 'click!=8.1.0' ]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    # Ruff version.
-    rev: 'v0.4.4'
+    rev: 'v0.4.7'
     hooks:
       - id: ruff
         args: [ "--fix" ]
-
-  - repo: local
-    hooks:
-      - id: check-added-large-files
-        name: Check for added large files
-        entry: check-added-large-files
-        language: system
-      - id: check-toml
-        name: Check Toml
-        entry: check-toml
-        language: system
-        types: [ toml ]
-      - id: check-yaml
-        name: Check Yaml
-        entry: check-yaml
-        language: system
-        types: [ yaml ]
-      - id: end-of-file-fixer
-        name: Fix End of Files
-        entry: end-of-file-fixer
-        language: system
-        types: [ text ]
-        stages: [ commit, push, manual ]
-      - id: trailing-whitespace
-        name: Trim Trailing Whitespace
-        entry: trailing-whitespace-fixer
-        language: system
-        types: [ text ]
-        stages: [ commit, push, manual ]
