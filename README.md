@@ -23,7 +23,7 @@ A [Pydantic](https://docs.pydantic.dev/latest/) ORM built on top of [PynamoDB](h
 
 ## Features
 
-Provides a Django-inspired "Active Record"-style ORM using single-table design built on top of Django.
+Provides a Django-inspired "Active Record"-style ORM using single-table design built on top of DynamoDB.
 
 ```python
 import abc
