@@ -2,6 +2,7 @@ import abc
 import itertools
 import uuid
 from inspect import isabstract
+from typing import Optional
 from typing import Tuple
 from typing import Type
 
@@ -41,7 +42,7 @@ class SingleTableBaseModel(BaseModel):
     _PynamodbMeta: MetaProtocol = PrivateAttr()
     __pynamodb_model__: Type[RootModelPrototype] = None
 
-    uid: uuid.UUID | None = None
+    uid: Optional[uuid.UUID] = None
 
     def __init_subclass__(cls, **kwargs):
         if cls.__pynamodb_model__:
