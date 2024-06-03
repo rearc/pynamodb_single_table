@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pynamodb_single_table"
-version = "0.1.2"
+version = "0.1.3"
 description = "PynamoDB Single Table"
 authors = ["David Maxson <scnerd@gmail.com>"]
 license = "MIT"
