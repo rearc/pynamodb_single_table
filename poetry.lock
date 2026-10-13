@@ -109,7 +109,7 @@ version = "3.5.2"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
 optional = false
 python-versions = ">=3.7"
-groups = ["dev", "docs"]
+groups = ["docs"]
 files = [
     {file = "charset_normalizer-3.5.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:195c26fb65950f8fce54e26349852b7bdd7c5f120aeefbcc440b8a20faaed4a3"},
     {file = "charset_normalizer-3.5.2-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:9373ad13ef0d2c0fb761e04e55bfdee5a08b52cef2c882c8fbe9935b1517152e"},
@@ -974,16 +974,16 @@ six = ">=1.5"
 
 [[package]]
 name = "pytz"
-version = "2026.4"
+version = "2026.5"
 description = "World timezone definitions, modern and historical"
 optional = false
 python-versions = "*"
-groups = ["docs"]
-markers = "python_version < \"3.9\""
+groups = ["dev", "docs"]
 files = [
-    {file = "pytz-2026.4-py2.py3-none-any.whl", hash = "sha256:9d514388fbc89ca0833203464272ac485b8828568ab73532f5020f17e892a0ff"},
-    {file = "pytz-2026.4.tar.gz", hash = "sha256:464303645bafafd72418898368b2429458f709cf1eb6a15372fbcc396b64da63"},
+    {file = "pytz-2026.5-py2.py3-none-any.whl", hash = "sha256:e658af3757f9e26a9d25dd2aff38335acd92bc9104f890a894b2c1ba28311b03"},
+    {file = "pytz-2026.5.tar.gz", hash = "sha256:fa23724b9c486543b9ff54a327ee7569ac83ade54bb9afd0fc18676620401c86"},
 ]
+markers = {docs = "python_version < \"3.9\""}
 
 [[package]]
 name = "pyyaml"
